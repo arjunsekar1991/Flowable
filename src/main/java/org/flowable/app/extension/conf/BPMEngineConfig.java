@@ -13,8 +13,10 @@ import org.flowable.engine.TaskService;
 import org.flowable.engine.common.AbstractEngineConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 @Configuration
+@Component
 public class BPMEngineConfig {
 
 	@Bean
@@ -26,7 +28,7 @@ public class BPMEngineConfig {
 				.setJdbcUsername("postgres")
 				.setJdbcPassword("")
 				.setDatabaseSchema("flowable")
-				.setDatabaseSchemaUpdate(AbstractEngineConfiguration.DB_SCHEMA_UPDATE_TRUE)
+				.setDatabaseSchemaUpdate(AbstractEngineConfiguration.DB_SCHEMA_UPDATE_FALSE)
 				.setEngineName("myengine")
 				.buildProcessEngine();
 		// processEngine
@@ -35,7 +37,6 @@ public class BPMEngineConfig {
 
 	@Bean
 	public RepositoryService repositoryService() {
-
 		return processEngine().getRepositoryService();
 	};
 

@@ -1,4 +1,5 @@
 import org.flowable.app.extension.conf.BPMEngineConfig;
+import org.flowable.engine.RepositoryService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,12 +13,12 @@ import com.nm.application.Application;
 public class MyTest {
 
 	@Autowired
-	BPMEngineConfig bpmEngineConfig;
+	RepositoryService repositoryService;
 
 	@Test
 	public void myMethod() {
-		System.out.println(bpmEngineConfig.processEngine().getName());
-		System.out.println(bpmEngineConfig.repositoryService().createDeployment()
-		        .addClasspathResource("myprocess.bpmn20.xml").deploy());
+	//	System.out.println(bpmEngineConfig.processEngine().getName());
+		System.out.println("###########################"+repositoryService.createDeployment()
+		        .addClasspathResource("MyProcess.bpmn.xml").deploy());
 	}
 }

@@ -2,6 +2,7 @@ package com.nm.services;
 
 import org.flowable.engine.ProcessEngine;
 import org.flowable.engine.RepositoryService;
+import org.flowable.engine.RuntimeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.*;
 import org.springframework.boot.autoconfigure.*;
@@ -15,11 +16,14 @@ public class Process {
 	RepositoryService repositoryService;
 	@Autowired
 	ProcessEngine processEngine;
+	@Autowired
+	RuntimeService runtimeService;
 	
 	@RequestMapping("/test")
 	String home() {
 		repositoryService.createDeployment()
-        .addClasspathResource("src/main/resources/MyProcess.bpmn20.xml").deploy();
+        .addClasspathResource("myprocess.bpmn20.xml").deploy();
+		runtimeService.startProcessInstanceByKey("myprocess");
 		//System.out.println(processEngine.getName());
 		return "Hello World!";
 	}

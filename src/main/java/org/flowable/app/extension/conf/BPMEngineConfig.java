@@ -37,7 +37,6 @@ public class BPMEngineConfig {
 	
 	@Bean
 	public DataSource dataSource() {
-
 		AtomikosDataSourceBean dataSource = new AtomikosDataSourceBean();
 		dataSource.setUniqueResourceName("postgres");
 		dataSource.setXaDataSourceClassName("org.postgresql.xa.PGXADataSource");
@@ -50,7 +49,6 @@ public class BPMEngineConfig {
 		dataSource.setXaProperties(p);
 		// ds.setConnectionPoolSize(5);
 		return dataSource;
-
 	}
 	
 	@Bean
@@ -66,7 +64,11 @@ public class BPMEngineConfig {
 		springProcessEngineConfiguration
 				.setDatabaseSchemaUpdate(ProcessEngineConfiguration.DB_SCHEMA_UPDATE_DROP_CREATE);
 		springProcessEngineConfiguration.setAsyncHistoryEnabled(true);
+		//springProcessEngineConfiguration.setAsyncHistoryEnabled(false);
 		springProcessEngineConfiguration.setAsyncHistoryExecutorActivate(true);
+		//springProcessEngineConfiguration.setAsyncHistoryExecutorActivate(false);
+	    springProcessEngineConfiguration.setAsyncHistoryExecutorMessageQueueMode(true);
+		//springProcessEngineConfiguration.setAsyncHistoryExecutorMessageQueueMode(false);
 		springProcessEngineConfiguration.setEngineName("my flowable engine");
 
 		/*
@@ -77,8 +79,7 @@ public class BPMEngineConfig {
 
 		springProcessEngineConfiguration.setAsyncHistoryListener(asyncHistoryListener);
 
-		springProcessEngineConfiguration.setJobManager(jobManager);
-		springProcessEngineConfiguration.setAsyncHistoryExecutorMessageQueueMode(true);
+        springProcessEngineConfiguration.setJobManager(jobManager);
 		return springProcessEngineConfiguration;
 	}
 

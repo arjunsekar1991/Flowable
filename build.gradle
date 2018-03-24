@@ -33,6 +33,14 @@ dependencies {
 	testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.0.0.RELEASE'
 // https://mvnrepository.com/artifact/org.postgresql/postgresql
 compile group: 'org.postgresql', name: 'postgresql', version: '42.2.2'
+compile group: 'org.flowable', name: 'flowable-jms-spring-executor', version: '6.2.1'
+compile group: 'org.apache.activemq', name: 'activemq-broker', version: '5.15.3'
+// https://mvnrepository.com/artifact/org.flowable/flowable-spring
+compile group: 'org.flowable', name: 'flowable-spring', version: '6.2.1'
+// https://mvnrepository.com/artifact/com.zaxxer/HikariCP
+compile group: 'com.zaxxer', name: 'HikariCP', version: '2.2.5'
+
+
 //asdf
 
 }

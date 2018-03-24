@@ -7,6 +7,7 @@ import javax.jms.Message;
 import javax.jms.Session;
 
 import org.flowable.engine.impl.history.async.AsyncHistoryListener;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
 
@@ -15,6 +16,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class JmsAsyncHistoryListener implements AsyncHistoryListener {
+	
+	@Autowired
 	protected JmsTemplate jmsTemplate;
     
     protected ObjectMapper objectMapper = new ObjectMapper();
@@ -39,12 +42,12 @@ public class JmsAsyncHistoryListener implements AsyncHistoryListener {
         }
     }
 
-    public JmsTemplate getJmsTemplate() {
+   /* public JmsTemplate getJmsTemplate() {
         return jmsTemplate;
     }
 
     public void setJmsTemplate(JmsTemplate jmsTemplate) {
         this.jmsTemplate = jmsTemplate;
-    }
+    }*/
     
 }

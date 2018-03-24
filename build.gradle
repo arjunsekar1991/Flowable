@@ -40,6 +40,18 @@ compile group: 'org.flowable', name: 'flowable-spring', version: '6.2.1'
 // https://mvnrepository.com/artifact/com.zaxxer/HikariCP
 compile group: 'com.zaxxer', name: 'HikariCP', version: '2.2.5'
 
+// https://mvnrepository.com/artifact/javax.transaction/transaction-api
+compile group: 'javax.transaction', name: 'transaction-api', version: '1.1'
+// https://mvnrepository.com/artifact/com.atomikos/transactions-jta
+compile group: 'com.atomikos', name: 'transactions-jta', version: '4.0.6'
+// https://mvnrepository.com/artifact/com.atomikos/transactions-api
+compile group: 'com.atomikos', name: 'transactions-api', version: '4.0.6'
+// https://mvnrepository.com/artifact/com.atomikos/transactions-jdbc
+compile group: 'com.atomikos', name: 'transactions-jdbc', version: '4.0.6'
+// https://mvnrepository.com/artifact/com.atomikos/transactions-jms
+compile group: 'com.atomikos', name: 'transactions-jms', version: '4.0.6'
+
+
 
 //asdf
 

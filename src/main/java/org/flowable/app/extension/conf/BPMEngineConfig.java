@@ -1,9 +1,13 @@
 package org.flowable.app.extension.conf;
 
+import java.util.Properties;
+
 import javax.jms.ConnectionFactory;
 import javax.sql.DataSource;
+import javax.transaction.SystemException;
+import javax.transaction.UserTransaction;
 
-import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.ActiveMQXAConnectionFactory;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.flowable.engine.DynamicBpmnService;
 import org.flowable.engine.FormService;
@@ -16,21 +20,24 @@ import org.flowable.engine.RepositoryService;
 import org.flowable.engine.RuntimeService;
 import org.flowable.engine.TaskService;
 import org.flowable.engine.impl.cfg.ProcessEngineConfigurationImpl;
+import org.flowable.engine.impl.history.async.AsyncHistoryListener;
 import org.flowable.spring.SpringProcessEngineConfiguration;
-import org.flowable.spring.executor.jms.HistoryJobMessageListener;
 import org.flowable.spring.executor.jms.MessageBasedJobManager;
-import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.jms.connection.CachingConnectionFactory;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.listener.DefaultMessageListenerContainer;
-import org.springframework.jms.listener.MessageListenerContainer;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.jta.JtaTransactionManager;
 
-import com.zaxxer.hikari.HikariDataSource;
+import com.atomikos.icatch.config.UserTransactionService;
+import com.atomikos.icatch.config.UserTransactionServiceImp;
+import com.atomikos.icatch.jta.UserTransactionImp;
+import com.atomikos.icatch.jta.UserTransactionManager;
+import com.atomikos.jdbc.AtomikosDataSourceBean;
+import com.atomikos.jms.AtomikosConnectionFactoryBean;
+import com.nm.listeners.JmsAsyncHistoryListener;
 
 @Configuration
 @Component
@@ -38,20 +45,56 @@ public class BPMEngineConfig {
 
 	@Bean
 	public DataSource dataSource() {
-		HikariDataSource dataSource = new HikariDataSource();
-		dataSource.setJdbcUrl("jdbc:postgresql://localhost:5432/postgres");
-		dataSource.setDriverClassName("org.postgresql.Driver");
-		dataSource.setUsername("postgres");
-		dataSource.setPassword("org.postgresql.Driver");
-		// dataSource.setMaximumPoolSize(50);
+
+		AtomikosDataSourceBean dataSource = new AtomikosDataSourceBean();
+		dataSource.setUniqueResourceName("postgres");
+		dataSource.setXaDataSourceClassName("org.postgresql.xa.PGXADataSource");
+		Properties p = new Properties();
+		p.setProperty("user", "postgres");
+		p.setProperty("password", "");
+		p.setProperty("serverName", "localhost");
+		p.setProperty("portNumber", "5432");
+		p.setProperty("databaseName", "postgres");
+		dataSource.setXaProperties(p);
+		// ds.setConnectionPoolSize(5);
 		return dataSource;
+
 	}
 
 	@Bean
+	public UserTransactionManager userTransactionManager() {
+		UserTransactionManager userTransactionManager = new UserTransactionManager();
+		userTransactionManager.setForceShutdown(false);
+		userTransactionManager.setStartupTransactionService(false);
+		return userTransactionManager;
+	}
+
+	@Bean
+	public UserTransaction userTransaction() {
+		UserTransactionImp userTransactionImp = new UserTransactionImp();
+		try {
+			userTransactionImp.setTransactionTimeout(1000);
+		} catch (SystemException e) {
+			e.printStackTrace();
+		}
+		return userTransactionImp;
+	}
+
+	@Bean
+	public UserTransactionService userTransactionService() {
+		Properties properties = new Properties();
+		properties.put("com.atomikos.icatch.service", "com.atomikos.icatch.standalone.UserTransactionServiceFactory");
+		UserTransactionServiceImp userTransactionServiceImp = new UserTransactionServiceImp(properties);
+		return userTransactionServiceImp;
+	}
+
+	@Bean
+	@DependsOn//(value = { "userTransactionManager", "userTransaction" })
 	public PlatformTransactionManager transactionManager() {
-		DataSourceTransactionManager transactionManager = new DataSourceTransactionManager();
-		transactionManager.setDataSource(dataSource());
-		return transactionManager;
+		JtaTransactionManager jtaTransactionManager = new JtaTransactionManager();
+		jtaTransactionManager.setTransactionManager(userTransactionManager());
+		jtaTransactionManager.setUserTransaction(userTransaction());
+		return jtaTransactionManager;
 	}
 
 	@Bean
@@ -70,14 +113,41 @@ public class BPMEngineConfig {
 		 * config.setAsyncHistoryJsonGzipCompressionEnabled(false);
 		 * config.setAsyncHistoryJsonGroupingThreshold(10);
 		 */
+
+		springProcessEngineConfiguration.setAsyncHistoryListener(jmsAsyncHistoryListener());
+
 		springProcessEngineConfiguration.setJobManager(jobManager());
 		springProcessEngineConfiguration.setAsyncHistoryExecutorMessageQueueMode(true);
 		return springProcessEngineConfiguration;
 	}
 
 	@Bean
+	public AsyncHistoryListener jmsAsyncHistoryListener() {
+		JmsAsyncHistoryListener jmsAsyncHistoryListener = new JmsAsyncHistoryListener();
+		jmsAsyncHistoryListener.setJmsTemplate(jmsTemplate());
+		return jmsAsyncHistoryListener;
+	}
+
+	@Bean
 	public ProcessEngine processEngine() {
 		return processEngineConfiguration().buildProcessEngine();
+	}
+
+	@Bean
+	public ConnectionFactory connectionFactory() {
+		ActiveMQXAConnectionFactory activeMQXAConnectionFactory = new ActiveMQXAConnectionFactory();
+		activeMQXAConnectionFactory.setUseAsyncSend(true);
+		activeMQXAConnectionFactory.setAlwaysSessionAsync(true);
+		activeMQXAConnectionFactory.setStatsEnabled(true);
+		activeMQXAConnectionFactory.setBrokerURL("tcp://127.0.0.1:61616");
+
+		AtomikosConnectionFactoryBean atomikosConnectionFactoryBean = new AtomikosConnectionFactoryBean();
+		atomikosConnectionFactoryBean.setUniqueResourceName("xamq");
+		atomikosConnectionFactoryBean.setLocalTransactionMode(false);
+		atomikosConnectionFactoryBean.setMaxPoolSize(100);
+		atomikosConnectionFactoryBean.setBorrowConnectionTimeout(30000);
+		atomikosConnectionFactoryBean.setXaConnectionFactory(activeMQXAConnectionFactory);
+		return atomikosConnectionFactoryBean;
 	}
 
 	@Bean
@@ -88,35 +158,12 @@ public class BPMEngineConfig {
 		return jmsTemplate;
 	}
 
-	
-
-	@Bean
-	public ConnectionFactory connectionFactory() {
-
-		//Using an in memory ms queue for easy of demonstration
-		// ActiveMQConnectionFactory activeMQConnectionFactory = new
-		// ActiveMQConnectionFactory("vm://localhost?broker.persistent=false");
-
-		// Uncomment the following line if a real, standalone ActiveMQ JMS queue should
-		// be used
-		// ActiveMQConnectionFactory activeMQConnectionFactory = new
-		// ActiveMQConnectionFactory("tcp://127.0.0.1:61616");
-		ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
-
-		activeMQConnectionFactory.setUseAsyncSend(true);
-		activeMQConnectionFactory.setAlwaysSessionAsync(true);
-		activeMQConnectionFactory.setStatsEnabled(true);
-		return new CachingConnectionFactory(activeMQConnectionFactory);
-	}
-
 	@Bean
 	public MessageBasedJobManager jobManager() {
 		MessageBasedJobManager jobManager = new MessageBasedJobManager();
 		jobManager.setHistoryJmsTemplate(jmsTemplate());
 		return jobManager;
 	}
-
-	
 
 	@Bean
 	public RepositoryService repositoryService() {
@@ -158,7 +205,5 @@ public class BPMEngineConfig {
 	public DynamicBpmnService dynamicBpmnService() {
 		return processEngine().getDynamicBpmnService();
 	};
-	
-	
 
 }

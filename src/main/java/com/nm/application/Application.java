@@ -1,12 +1,14 @@
 package com.nm.application;
 
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @ComponentScan(basePackages = { "org.flowable.app.extension.conf", "org.flowable.app.extension.bean",
 		"com.nm.services" })
+@EnableAutoConfiguration
 public class Application {
 
 	public static void main(String[] args) {

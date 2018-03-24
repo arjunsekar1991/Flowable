@@ -7,8 +7,14 @@
  */
 
 // Apply the java-library plugin to add support for Java Library
+plugins {
+
+  id "com.github.johnrengelman.shadow" version "2.0.3"
+  
+}
 apply plugin: 'java-library'
 
+//apply plugin: 'org.springframework.boot'
 // In this section you declare where to find the dependencies of your project
 repositories {
     // Use jcenter for resolving your dependencies.
@@ -16,56 +22,31 @@ repositories {
     mavenCentral()
 }
 
-
 jar {
     manifest {
-        attributes "Main-Class": "com.nm.application.Application"
-    }
- 
-    from {
-        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+        attributes 'Main-Class': 'com.nm.application.Application'
     }
 }
 
 
 dependencies {
-    // This dependency is exported to consumers, that is to say found on their compile classpath.
+
     api 'org.apache.commons:commons-math3:3.6.1'
-
-    // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     implementation 'com.google.guava:guava:23.0'
-
-    // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-parent', version: '2.0.0.RELEASE'
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '2.0.0.RELEASE'
-// https://mvnrepository.com/artifact/org.flowable/flowable-engine
 	compile group: 'org.flowable', name: 'flowable-engine', version: '6.2.1'
-// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test
 	testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.0.0.RELEASE'
-// https://mvnrepository.com/artifact/org.postgresql/postgresql
-compile group: 'org.postgresql', name: 'postgresql', version: '42.2.2'
-compile group: 'org.flowable', name: 'flowable-jms-spring-executor', version: '6.2.1'
-compile group: 'org.apache.activemq', name: 'activemq-broker', version: '5.15.3'
-// https://mvnrepository.com/artifact/org.flowable/flowable-spring
-compile group: 'org.flowable', name: 'flowable-spring', version: '6.2.1'
-// https://mvnrepository.com/artifact/com.zaxxer/HikariCP
-compile group: 'com.zaxxer', name: 'HikariCP', version: '2.2.5'
-
-// https://mvnrepository.com/artifact/javax.transaction/transaction-api
-compile group: 'javax.transaction', name: 'transaction-api', version: '1.1'
-// https://mvnrepository.com/artifact/com.atomikos/transactions-jta
-compile group: 'com.atomikos', name: 'transactions-jta', version: '4.0.6'
-// https://mvnrepository.com/artifact/com.atomikos/transactions-api
-compile group: 'com.atomikos', name: 'transactions-api', version: '4.0.6'
-// https://mvnrepository.com/artifact/com.atomikos/transactions-jdbc
-compile group: 'com.atomikos', name: 'transactions-jdbc', version: '4.0.6'
-// https://mvnrepository.com/artifact/com.atomikos/transactions-jms
-compile group: 'com.atomikos', name: 'transactions-jms', version: '4.0.6'
-
-
-
-//asdf
-
+	compile group: 'org.postgresql', name: 'postgresql', version: '42.2.2'
+	compile group: 'org.flowable', name: 'flowable-jms-spring-executor', version: '6.2.1'
+	compile group: 'org.apache.activemq', name: 'activemq-broker', version: '5.15.3'
+	compile group: 'org.flowable', name: 'flowable-spring', version: '6.2.1'
+	compile group: 'com.zaxxer', name: 'HikariCP', version: '2.2.5'
+	compile group: 'javax.transaction', name: 'transaction-api', version: '1.1'
+	compile group: 'com.atomikos', name: 'transactions-jta', version: '4.0.6'
+	compile group: 'com.atomikos', name: 'transactions-api', version: '4.0.6'
+	compile group: 'com.atomikos', name: 'transactions-jdbc', version: '4.0.6'
+	compile group: 'com.atomikos', name: 'transactions-jms', version: '4.0.6'
 }
 

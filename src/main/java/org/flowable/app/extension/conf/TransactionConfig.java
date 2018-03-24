@@ -94,7 +94,7 @@ public class TransactionConfig {
 		AtomikosConnectionFactoryBean atomikosConnectionFactoryBean = new AtomikosConnectionFactoryBean();
 		atomikosConnectionFactoryBean.setUniqueResourceName("xamq201");
 		atomikosConnectionFactoryBean.setLocalTransactionMode(false);
-		atomikosConnectionFactoryBean.setMaxPoolSize(100);
+		atomikosConnectionFactoryBean.setMaxPoolSize(10);
 		atomikosConnectionFactoryBean.setBorrowConnectionTimeout(30000);
 		atomikosConnectionFactoryBean.setXaConnectionFactory(activeMQXAConnectionFactory);
 		return atomikosConnectionFactoryBean;

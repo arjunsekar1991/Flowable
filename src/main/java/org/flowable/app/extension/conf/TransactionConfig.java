@@ -3,22 +3,28 @@ package org.flowable.app.extension.conf;
 import java.util.Properties;
 
 import javax.jms.ConnectionFactory;
+import javax.jms.MessageListener;
 import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
+
 import org.apache.activemq.ActiveMQXAConnectionFactory;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.flowable.engine.impl.history.async.AsyncHistoryListener;
 import org.flowable.spring.executor.jms.MessageBasedJobManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.listener.DefaultMessageListenerContainer;
+import org.springframework.jms.listener.MessageListenerContainer;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.jta.JtaTransactionManager;
+
 import com.atomikos.icatch.config.UserTransactionService;
 import com.atomikos.icatch.config.UserTransactionServiceImp;
 import com.atomikos.icatch.jta.UserTransactionImp;
 import com.atomikos.icatch.jta.UserTransactionManager;
 import com.atomikos.jms.AtomikosConnectionFactoryBean;
+import com.nm.listeners.ExampleJmsListener;
 import com.nm.listeners.JmsAsyncHistoryListener;
 
 @Component
@@ -61,7 +67,15 @@ public class TransactionConfig {
 		return jtaTransactionManager;
 	}
 
-	
+	/*@Bean
+	//@DependsOn//(value = { "userTransactionManager", "userTransaction" })
+	public PlatformTransactionManager platformTransactionManager2() {
+		JtaTransactionManager jtaTransactionManager = new JtaTransactionManager();
+		jtaTransactionManager.setTransactionManager(userTransactionManager());
+		jtaTransactionManager.setUserTransaction(userTransaction());
+		return jtaTransactionManager;
+	}
+	*/
 
 	@Bean
 	public AsyncHistoryListener jmsAsyncHistoryListener() {
@@ -78,12 +92,31 @@ public class TransactionConfig {
 		activeMQXAConnectionFactory.setBrokerURL("tcp://127.0.0.1:61616");
 
 		AtomikosConnectionFactoryBean atomikosConnectionFactoryBean = new AtomikosConnectionFactoryBean();
-		atomikosConnectionFactoryBean.setUniqueResourceName("xamq");
+		atomikosConnectionFactoryBean.setUniqueResourceName("xamq201");
 		atomikosConnectionFactoryBean.setLocalTransactionMode(false);
 		atomikosConnectionFactoryBean.setMaxPoolSize(100);
 		atomikosConnectionFactoryBean.setBorrowConnectionTimeout(30000);
 		atomikosConnectionFactoryBean.setXaConnectionFactory(activeMQXAConnectionFactory);
 		return atomikosConnectionFactoryBean;
+	}
+	
+
+	
+	@Bean
+	public ConnectionFactory connectionFactory2() {
+		ActiveMQXAConnectionFactory activeMQXAConnectionFactory = new ActiveMQXAConnectionFactory();
+		activeMQXAConnectionFactory.setUseAsyncSend(true);
+		activeMQXAConnectionFactory.setAlwaysSessionAsync(true);
+		activeMQXAConnectionFactory.setStatsEnabled(true);
+		activeMQXAConnectionFactory.setBrokerURL("tcp://127.0.0.1:61616");
+
+		/*AtomikosConnectionFactoryBean atomikosConnectionFactoryBean = new AtomikosConnectionFactoryBean();
+		atomikosConnectionFactoryBean.setUniqueResourceName("xamq200");
+		atomikosConnectionFactoryBean.setLocalTransactionMode(false);
+		atomikosConnectionFactoryBean.setMaxPoolSize(100);
+		atomikosConnectionFactoryBean.setBorrowConnectionTimeout(30000);
+		atomikosConnectionFactoryBean.setXaConnectionFactory(activeMQXAConnectionFactory);*/
+		return activeMQXAConnectionFactory;
 	}
 
 	@Bean
@@ -100,5 +133,38 @@ public class TransactionConfig {
 		jobManager.setHistoryJmsTemplate(jmsTemplate());
 		return jobManager;
 	}
+	
+	@Bean
+    public MessageListenerContainer messageListenerContainer() {
+
+        DefaultMessageListenerContainer messageListenerContainer = new DefaultMessageListenerContainer();
+
+        messageListenerContainer.setSessionTransacted(true);
+
+        messageListenerContainer.setTransactionManager(platformTransactionManager());
+
+        messageListenerContainer.setConnectionFactory(connectionFactory2());
+
+        messageListenerContainer.setDestinationName("flowable-history-jobs");
+
+        messageListenerContainer.setMessageListener(jmsListener());
+
+        messageListenerContainer.setConcurrentConsumers(48);
+
+        messageListenerContainer.start();
+
+        return messageListenerContainer;
+
+    }
+
+
+
+    @Bean
+
+    public MessageListener jmsListener() {
+
+        return new ExampleJmsListener();
+
+    }
 
 }

@@ -102,7 +102,7 @@ public class TransactionConfig {
 	
 
 	
-	@Bean
+/*	@Bean
 	public ConnectionFactory connectionFactory2() {
 		ActiveMQXAConnectionFactory activeMQXAConnectionFactory = new ActiveMQXAConnectionFactory();
 		activeMQXAConnectionFactory.setUseAsyncSend(true);
@@ -110,14 +110,14 @@ public class TransactionConfig {
 		activeMQXAConnectionFactory.setStatsEnabled(true);
 		activeMQXAConnectionFactory.setBrokerURL("tcp://127.0.0.1:61616");
 
-		/*AtomikosConnectionFactoryBean atomikosConnectionFactoryBean = new AtomikosConnectionFactoryBean();
+		AtomikosConnectionFactoryBean atomikosConnectionFactoryBean = new AtomikosConnectionFactoryBean();
 		atomikosConnectionFactoryBean.setUniqueResourceName("xamq200");
 		atomikosConnectionFactoryBean.setLocalTransactionMode(false);
 		atomikosConnectionFactoryBean.setMaxPoolSize(100);
 		atomikosConnectionFactoryBean.setBorrowConnectionTimeout(30000);
-		atomikosConnectionFactoryBean.setXaConnectionFactory(activeMQXAConnectionFactory);*/
+		atomikosConnectionFactoryBean.setXaConnectionFactory(activeMQXAConnectionFactory);
 		return activeMQXAConnectionFactory;
-	}
+	}*/
 
 	@Bean
 	public JmsTemplate jmsTemplate() {
@@ -134,7 +134,7 @@ public class TransactionConfig {
 		return jobManager;
 	}
 	
-	@Bean
+/*	@Bean
     public MessageListenerContainer messageListenerContainer() {
 
         DefaultMessageListenerContainer messageListenerContainer = new DefaultMessageListenerContainer();
@@ -155,7 +155,7 @@ public class TransactionConfig {
 
         return messageListenerContainer;
 
-    }
+    }*/
 
 
 

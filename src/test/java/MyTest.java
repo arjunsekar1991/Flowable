@@ -1,4 +1,4 @@
-import org.flowable.app.extension.conf.BPMEngineConfig;
+/*import org.flowable.app.extension.conf.BPMEngineConfig;
 import org.flowable.engine.RepositoryService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,3 +22,4 @@ public class MyTest {
 		        .addClasspathResource("MyProcess.bpmn.xml").deploy());
 	}
 }
+*/

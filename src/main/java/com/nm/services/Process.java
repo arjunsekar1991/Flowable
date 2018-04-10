@@ -18,16 +18,12 @@ public class Process {
 	ProcessEngine processEngine;
 	@Autowired
 	RuntimeService runtimeService;
-	
+
 	@RequestMapping("/test")
 	String home() {
-		repositoryService.createDeployment()
-        .addClasspathResource("myprocess.bpmn20.xml").deploy();
+		repositoryService.createDeployment().addClasspathResource("myprocess.bpmn20.xml").deploy();
 		runtimeService.startProcessInstanceByKey("myprocess");
-		//System.out.println(processEngine.getName());
-		return "Hello World!";
+		return processEngine.getName();
 	}
-
-	
 
 }
